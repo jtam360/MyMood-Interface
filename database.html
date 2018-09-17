@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+    <!-- jQuery library, then Popper JS, then JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+    <title>MyMood Database Interface</title>
+  </head>
+  
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-sm navbar-dark bg-primary" id="mainNav">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="database.html">MyMood</a>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="database.html">Database
+              <span class="sr-only">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="help.html">Help</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="aboutus.html">About Us</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+              Light Theme
+            </a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="#">Dark Theme</a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="logout.html">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <br>
+    
+    <!-- Database Table -->
+    <div class="container table-responsive">
+      <h1>MyMood Database Table</h1>
+      <!-- Search Bar -->
+      <input class="form-control" id="searchInput" type="text" placeholder="Search..">
+      <br>
+      <table class="table table-sm table-striped table-bordered table-hover" id="session_table">
+        <thead>
+          <tr>
+            <th>Session ID</th>
+            <th>User ID</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="tableContents">
+          <tr><td>11223344</td><td>088992</td><td>April 4, 2018 1:20PM</td></tr>
+          <tr><td>45675474575</td><td>088992</td><td>September 15, 2018 6:20PM</td></tr>
+          <tr><td>3245325342543</td><td>088992</td><td>October 10, 2018 5:50PM</td></tr>
+          <tr><td>4</td><td>088992</td><td>September 15, 2018 10:20PM</td></tr>
+          <tr><td>001</td><td>088992</td><td>October 23, 2018 11:00AM</td></tr>
+          <tr><td>23344</td><td>088992</td><td>September 15, 2018 4:20PM</td></tr>
+          <tr><td>223344</td><td>088992</td><td>September 9, 2018 5:12PM</td></tr>
+          <tr><td>2244</td><td>088992</td><td>September 15, 2018 9:20AM</td></tr>
+          <tr><td>0298333333</td><td>143132432432</td><td>January 15, 2018 8:20PM</td></tr>
+          <tr><td>13123412214214142535</td><td>1412412411</td><td>November 15, 2018 12:20PM</td></tr>
+          <tr><td>1232131</td><td>088000</td><td>December 19, 2018 8:15PM</td></tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="container">
+      <ul class="pagination" style="margin:20px 0">
+        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+      </ul>
+    </div>
+    
+    <!-- Search Function -->
+    <script>
+    $(document).ready(function(){
+      $("#searchInput").on("keyup", function(){
+        var value = $(this).val().toLowerCase();
+        $("#tableContents tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+      });
+    });
+    </script>
+  </body>
+</html>
