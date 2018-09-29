@@ -42,7 +42,7 @@
             </div>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="logout.html">Logout</a>
+            <a class="nav-link" href="login.html">Logout</a>
           </li>
         </ul>
       </div>
@@ -64,7 +64,7 @@
           </tr>
         </thead>
         <tbody id="tableContents">
-          <tr><td>11223344</td><td>088992</td><td>April 4, 2018 1:20PM</td></tr>
+          <tr><td onClick="document.location.href='session.html';">11223344</td><td>088992</td><td>April 4, 2018 1:20PM</td></tr>
           <tr><td>45675474575</td><td>088992</td><td>September 15, 2018 6:20PM</td></tr>
           <tr><td>3245325342543</td><td>088992</td><td>October 10, 2018 5:50PM</td></tr>
           <tr><td>4</td><td>088992</td><td>September 15, 2018 10:20PM</td></tr>
@@ -92,8 +92,8 @@
     
     <!-- Search Function -->
     <script>
-    $(document).ready(function(){
-      $("#searchInput").on("keyup", function(){
+    $(document).ready(function() {
+      $("#searchInput").on("keyup", function() {
         var value = $(this).val().toLowerCase();
         $("#tableContents tr").filter(function() {
           $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
