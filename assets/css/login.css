@@ -1,5 +1,5 @@
 body {
-  background: url(images/cloudBackground.png) no-repeat center center fixed;
+  background: url(../../images/cloudBackground.png) no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: 100% auto;
   height: 100%;
