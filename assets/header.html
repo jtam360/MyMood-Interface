@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+  </head>
+  
+  <body>
+  <!-- Navigation Bar -->
+  <a class="navbar-brand" href="database.html">MyMood</a>
+    <ul class="nav navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="database.html">Database</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="help.html">Help</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="aboutus.html">About Us</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="login.html">Login</a>
+      </li>
+    </ul>
+    
+    <!-- Navbar change active state -->
+    <script>
+    $(document).ready(function() {
+      $.each($('#mainNav').find('li'), function() {
+        $(this).toggleClass('active', 
+          window.location.pathname.indexOf($(this).find('a').attr('href')) != -1);
+      }); 
+    });
+    </script>
+  </body>
+</html>
