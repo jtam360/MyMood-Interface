@@ -12,8 +12,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-    
-    <!-- Load JavaScript, then CSS -->
+
     <script src="assets/js/main.js"></script>
     <link rel="stylesheet" href="assets/css/login.css">
 
@@ -66,16 +65,13 @@
         var ValidPassword = $("#password").val() === "securityisnotanafterthoughtitstartsatthedesign";
         if (ValidUsername === true && ValidPassword === true) { 
           window.location = "database.html"; 
-        }
-        else if (ValidUsername === false && ValidPassword === true) {
+        } else if (ValidUsername === false && ValidPassword === true) {
           $(".invalidUser").css("display", "block");
           $(".invalidPass").css("display", "none");
-        }
-        else if (ValidUsername === true && ValidPassword === false) {
+        } else if (ValidUsername === true && ValidPassword === false) {
           $(".invalidUser").css("display", "none");
           $(".invalidPass").css("display", "block");
-        }
-        else {
+        } else {
           $(".invalidUser").css("display", "block");
           $(".invalidPass").css("display", "block");
         }
