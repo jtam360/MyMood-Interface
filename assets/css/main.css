@@ -3,3 +3,19 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+
+.back {
+  font-size: 30px;
+  position: absolute;
+  left: 13%;
+  top: 10%;
+  margin: auto;
+}
+
+th {
+  background-color: #ffffff;
+}
+
+.zebra-stripe {
+  background-color: #f2f2f2;
+}
