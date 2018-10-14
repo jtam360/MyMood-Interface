@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Clientside check user login via Cookies (Insecure) -->
+    <script>
+      if (document.cookie.indexOf("DatabaseSession=Valid") == -1) {
+        location.href = "login.html";
+      }
+    </script>
+    
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
