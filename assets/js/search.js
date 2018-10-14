@@ -22,7 +22,8 @@ var search = search || (function() {
         $(args[0] + " tr:visible").each(function(e) {
           if (e % 2 == 1) {
             $(this).addClass("zebra-stripe");
-          } else {
+          }
+          else {
             $(this).removeClass("zebra-stripe");
           }
         });
