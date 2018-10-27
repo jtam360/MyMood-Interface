@@ -1,10 +1,18 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Clientside check user login via Cookies (Insecure) -->
+    <!-- Clientside check user login via Cookies (Insecure), Get session_id from sessionStorage -->
     <script>
-      if (document.cookie.indexOf("databaseSession=valid") == -1) {
-        location.href = "login.html";
+      window.onload = function() {
+        if (document.cookie.indexOf("databaseSession=valid") == -1) {
+          location.href = "login.html";
+        }
+        if (sessionStorage.getItem("id") === null) {
+          location.href = "error.html";
+        }
+        else {
+          document.getElementById("result").innerHTML = sessionStorage.getItem("id").slice(23,44) + "...:";
+        }
       }
     </script>
     
@@ -21,7 +29,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
     <script src="assets/js/main.js"></script>
-    <script src="assets/js/search.js"></script>
     <link rel="stylesheet" href="assets/css/main.css">
     
     <title>MyMood | Session</title>
@@ -37,29 +44,16 @@
     <!-- Session Table -->
     <div class="container table-responsive">
       <a href="database.html" id="back">< Back</a>
-      <h1>Viewing Session #11223344:</h1>
-      <input class="form-control" id="searchInput" type="text" placeholder="Search..">
+      <h1>Viewing Session <span id="result"></span></h1>
+      <!-- Search Bar -->
+      <input class="form-control" id="searchInput" onkeyup="search()" type="text" placeholder="Search..">
       <br>
       <table class="table table-sm table-bordered table-hover" id="session_table">
         <thead>
           <tr>
             <th>Responses</th>
-            <th>Time</th>
           </tr>
         </thead>
-        <tbody id="tableContents">
-          <tr><td>Can I talk to you</td><td>September 15, 2018 4:20PM</td></tr>
-          <tr><td>I have had a lot of work to do lately</td><td>September 15, 2018 4:20PM</td></tr>
-          <tr><td>How can I relieve some stress</td><td>September 15, 2018 4:21PM</td></tr>
-          <tr><td>Tell me more about that</td><td>September 15, 2018 4:21PM</td></tr>
-          <tr><td>I have also felt very depressed</td><td>September 15, 2018 4:22PM</td></tr>
-          <tr><td>Assess me</td><td>September 15, 2018 4:23PM</td></tr>
-          <tr><td>Where can I find the nearest therapist</td><td>September 15, 2018 4:25PM</td></tr>
-          <tr><td>Repeat</td><td>September 15, 2018 4:25PM</td></tr>
-          <tr><td>What can I do right now</td><td>September 15, 2018 4:26PM</td></tr>
-          <tr><td>I'm bored</td><td>September 15, 2018 4:26PM</td></tr>
-          <tr><td>Let's talk</td><td>September 15, 2018 4:26PM</td></tr>
-        </tbody>
       </table>
     </div>
     
@@ -74,10 +68,69 @@
       </ul>
     </div>
     
+    <!-- Zebra Striping -->
+    <script>
+    function zebraStripe() {
+      // Go through all rows that are visible, filter rows by odd and even
+      var $allRows = $('tr:visible');
+      var $oddRows = $allRows.filter(':odd');
+      var $evenRows = $allRows.filter(':even');
+      
+      // Remove old classes, then add new ones.
+      $oddRows.removeClass('even').addClass('odd');
+      $evenRows.removeClass('odd').addClass('even');
+    };
+    </script>
+    
     <!-- Search Function -->
     <script>
-      search.init(["#session_table"]);
-      search.searchRows();
+    function search() {
+      var input, filter, table, tr, td, i;
+      input = document.getElementById("searchInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("session_table");
+      tr = table.getElementsByTagName("tr");
+
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+          if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } 
+          else {
+            tr[i].style.display = "none";
+          }
+        } 
+      }
+      zebraStripe();
+    }
+    </script>
+    
+    <!-- Read JSON File -->
+    <script>
+    $(document).ready(function readJson() {
+      $.getJSON("/assets/json/sessions.json", function(data) {
+        var tblRow = "";
+        var counter = 0; // Initialize counter to count odd row
+        var oddClass = "";
+        $.each(data.databaseContent, function(key, val) {
+          if (val.session_id === sessionStorage.getItem("id")) {
+            $.each(val.responses, function(i, data) {
+              counter += 1;
+              if (counter % 2 == 1) {
+                oddClass = "class=odd";
+              }
+              else {
+                oddClass = "";
+              }
+              tblRow += "<tr " + oddClass + ">" + "<td>" + data + "</td>" + "</tr>";
+            });
+          }
+        });
+        $("#session_table").append(tblRow);
+      });
+    });
     </script>
   </body>
 </html>

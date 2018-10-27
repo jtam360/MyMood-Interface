@@ -21,7 +21,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
     <script src="assets/js/main.js"></script>
-    <script src="assets/js/search.js"></script>
     <link rel="stylesheet" href="assets/css/main.css">
     
     <title>MyMood | Database</title>
@@ -37,8 +36,20 @@
     <!-- Database Table -->
     <div class="container table-responsive">
       <h1>MyMood Database Table</h1>
-      <!-- Search Bar -->
-      <input class="form-control" id="searchInput" type="text" placeholder="Search..">
+      <form class="form-inline">
+        <div class="form-group">
+          <!-- Option Dropdown list -->
+          <select class="form-control" id="searchOption">
+            <option value="session_id">Session ID</option>
+            <option value="user_id">User ID</option>
+            <option value="session_time">Time</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <!-- Search Bar -->
+          <input class="form-control" style="width: 988px;" id="searchInput" onkeyup="search()" type="text" placeholder="Search..">
+        </div>
+      </form>
       <br>
       <table class="table table-sm table-bordered table-hover" id="database_table">
         <thead>
@@ -48,19 +59,6 @@
             <th>Time</th>
           </tr>
         </thead>
-        <tbody id="tableContents">
-          <tr><td onClick="document.location.href='session.html';">11223344</td><td>088992</td><td>April 4, 2018 1:20PM</td></tr>
-          <tr><td>45675474575</td><td>088992</td><td>September 15, 2018 6:20PM</td></tr>
-          <tr><td>3245325342543</td><td>088992</td><td>October 10, 2018 5:50PM</td></tr>
-          <tr><td>4</td><td>088992</td><td>September 15, 2018 10:20PM</td></tr>
-          <tr><td>001</td><td>088992</td><td>October 23, 2018 11:00AM</td></tr>
-          <tr><td>23344</td><td>088992</td><td>September 15, 2018 4:20PM</td></tr>
-          <tr><td>223344</td><td>088992</td><td>September 9, 2018 5:12PM</td></tr>
-          <tr><td>2244</td><td>088992</td><td>September 15, 2018 9:20AM</td></tr>
-          <tr><td>0298333333</td><td>143132432432</td><td>January 15, 2018 8:20PM</td></tr>
-          <tr><td>13123412214214142535</td><td>1412412411</td><td>November 15, 2018 12:20PM</td></tr>
-          <tr><td>1232131</td><td>088000</td><td>December 19, 2018 8:15PM</td></tr>
-        </tbody>
       </table>
     </div>
     
@@ -75,10 +73,76 @@
       </ul>
     </div>
     
+    <!-- Zebra Striping -->
+    <script>
+    function zebraStripe() {
+      // Go through all rows that are visible, filter old rows by odd and even
+      var $allRows = $('tr:visible');
+      var $oddRows = $allRows.filter(':odd');
+      var $evenRows = $allRows.filter(':even');
+      
+      // Remove old classes, then add new ones
+      $oddRows.removeClass('even').addClass('odd');
+      $evenRows.removeClass('odd').addClass('even');
+    };
+    </script>
+    
     <!-- Search Function -->
     <script>
-      search.init(["#database_table"]);
-      search.searchRows();
+    function search() {
+      var input, filter, table, tr, searchOption, searchValue, td, i;
+      input = document.getElementById("searchInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("database_table");
+      tr = table.getElementsByTagName("tr");
+      searchOption = document.getElementById("searchOption");
+      searchValue = searchOption.options[searchOption.selectedIndex].value;
+
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        if (searchValue == "session_id") {
+          td = tr[i].getElementsByTagName("td")[0];
+        }
+        else if (searchValue == "user_id") {
+          td = tr[i].getElementsByTagName("td")[1];
+        }
+        else {
+          td = tr[i].getElementsByTagName("td")[2];
+        }
+        if (td) {
+          if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } 
+          else {
+            tr[i].style.display = "none";
+          }
+        } 
+      }
+      zebraStripe();
+    }
+    </script>
+    
+    <!-- Read JSON File -->
+    <script>
+    $(document).ready(function readJson() {
+      $.getJSON("/assets/json/sessions.json", function(data) {
+        var tblRow = "";
+        var counter = 0;
+        var oddClass = "";
+        $.each(data.databaseContent, function(key, val) {
+          counter += 1;
+          if (counter % 2 == 1) {
+            oddClass = "class=odd";
+          }
+          else {
+            oddClass = "";
+          }
+          tblRow += "<tr " + oddClass + ">" + "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.session_id + "');\">"  + val.session_id.slice(23,44) + "..." + "</td>" +
+          "<td>" + val.user_id.slice(18,40) + "..." + "</td>" + "<td>" + val.session_time + "</td>" + "</tr>";
+        });
+        $("#database_table").append(tblRow);
+      });
+    });
     </script>
   </body>
 </html>
