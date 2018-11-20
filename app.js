@@ -8,18 +8,33 @@ var path = require("path");
 var bodyParser = require("body-parser");
 var session = require("express-session");
 var cookieParser = require("cookie-parser");
+var schedule = require("node-schedule");
+var AWS = require("aws-sdk");
+
+// Reads environment variables from text file
+require("dotenv").config();
+AWS.config.update({accessKeyId: process.env.ACCESS_KEY, secretAccessKey: process.env.SECRET_ACCESS_KEY, region: "us-west-1"});
+
+var docClient = new AWS.DynamoDB.DocumentClient();
+var params = {
+  TableName: "Interactions"
+};
 
 var helmet = require("helmet");
-var ONE_YEAR = 31536000;
+var HELMET_TTL_SECONDS = 31536000;
 
 httpsApp.use(helmet.hsts({
-  maxAge: ONE_YEAR,
+  maxAge: HELMET_TTL_SECONDS,
   includeSubdomains: true,
   force: true
 }));
 
 httpsApp.use(helmet());
 httpsApp.use(express.static(path.join(__dirname, "public")));
+httpsApp.use(express.urlencoded({
+  extended: true
+}));
+httpsApp.use(bodyParser.json());
 
 var cipher = ["ECDHE-ECDSA-AES256-GCM-SHA384",
   "ECDHE-RSA-AES256-GCM-SHA384",
@@ -32,6 +47,29 @@ var cipher = ["ECDHE-ECDSA-AES256-GCM-SHA384",
   "!aNULL",
   "!MD5",
   "!DSS"].join(":");
+  
+/*
+Update the JSON at midnight of every Monday
+ScheduleJob("minute" "hour" "dayOfMonth" "month" "dayOfWeek")
+* = any value
+*/
+var updateJSON = schedule.scheduleJob("0 0 * * 1", function() {
+  var jsonData = {}
+  jsonData.databaseContent = []
+  docClient.scan(params).eachPage((err, data, done) => {
+    if (data != null) {
+      for (let index = 0; index < data.Items.length; index++) {
+        const element = data.Items[index];
+        jsonData.databaseContent.push(element);
+      }
+      fs.writeFile("public/assets/json/interactions.json", JSON.stringify(jsonData, null, "\t"), function(err) {
+        if (err) throw err;
+        console.log("JSON updated.");
+      });
+    }
+    done();
+  });
+});
   
 // Redirect to URL based on the specified path
 httpApp.get("*", function(req, res) {
