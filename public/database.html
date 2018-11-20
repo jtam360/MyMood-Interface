@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Clientside check user login via Cookies (Insecure) -->
+    <script>
+      if (document.cookie.indexOf("databaseSession=valid") == -1) {
+        location.href = "login.html";
+      }
+    </script>
+    
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+    <!-- jQuery library, then Popper JS, then JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/readJson.js"></script>
+    <link rel="stylesheet" href="assets/css/main.css">
+    
+    <title>MyMood | Database</title>
+  </head>
+  
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand navbar-dark bg-primary" id="mainNav">
+      <div class="container-fluid" id="header"></div>
+    </nav>
+    <br>
+    
+    <!-- Database Table -->
+    <div class="container table-responsive">
+      <h1>MyMood Database Table</h1>
+      <form class="form-inline">
+        <div class="form-group">
+          <!-- Option Dropdown list -->
+          <select class="form-control" id="searchOption">
+            <option value="session_id">Session ID</option>
+            <option value="user_id">User ID</option>
+            <option value="session_time">Time</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <!-- Search Bar -->
+          <input class="form-control" style="width: 988px;" id="searchInput" onkeyup="search()" type="text" placeholder="Search..">
+        </div>
+      </form>
+      <br>
+      <table class="table table-sm table-bordered table-hover" id="database_table">
+        <thead>
+          <tr>
+            <th>Session ID</th>
+            <th>User ID</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="container">
+      <ul class="pagination" style="margin:20px 0">
+        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+      </ul>
+      <a class="button" href="/assets/json/sessions.json" download="sessions.json">Download raw JSON file</a>
+    </div>
+
+    <!-- Search Function -->
+    <script>
+    function search() {
+      var input, filter, table, tr, searchOption, searchValue, td, i;
+      input = document.getElementById("searchInput");
+      filter = input.value.toUpperCase();
+      table = document.getElementById("database_table");
+      tr = table.getElementsByTagName("tr");
+      searchOption = document.getElementById("searchOption");
+      searchValue = searchOption.options[searchOption.selectedIndex].value;
+
+      // Loop through all table rows, and hide those who don't match the search query
+      for (i = 0; i < tr.length; i++) {
+        if (searchValue == "session_id") {
+          td = tr[i].getElementsByTagName("td")[0];
+        }
+        else if (searchValue == "user_id") {
+          td = tr[i].getElementsByTagName("td")[1];
+        }
+        else {
+          td = tr[i].getElementsByTagName("td")[2];
+        }
+        if (td) {
+          if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } 
+          else {
+            tr[i].style.display = "none";
+          }
+        } 
+      }
+      readJson.zebraStripe();
+    }
+    </script>
+    
+    <!-- Read JSON File -->
+    <script>
+      readJson.init(["#database_table"]);
+      readJson.readContents();
+    </script>
+  </body>
+</html>
