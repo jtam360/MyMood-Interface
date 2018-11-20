@@ -27,3 +27,26 @@ tr.odd {
   height: auto;
   width: auto;
 }
+
+.pagination {
+  float: left;
+}
+
+.button {
+  background: #bccfdb;
+  background: -webkit-gradient(linear, left top, left bottom, from(#e2eaf0), to(#bccfdb));
+  padding: 5.5px 11px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  color: #000000;
+  font-size: 14px;
+  font-family: Trebuchet MS, serif;
+  text-decoration: none;
+  float: right;
+}
+
+.button:hover {
+  background: #3296d9;
+  color: #ffffff;
+  text-decoration: none;
+}
