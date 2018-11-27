@@ -8,6 +8,7 @@ var path = require("path");
 var bodyParser = require("body-parser");
 var session = require("express-session");
 var cookieParser = require("cookie-parser");
+var file = __dirname + "/public/assets/json/interactions.json";
 var schedule = require("node-schedule");
 var AWS = require("aws-sdk");
 
@@ -62,7 +63,7 @@ var updateJSON = schedule.scheduleJob("0 0 * * 1", function() {
         const element = data.Items[index];
         jsonData.databaseContent.push(element);
       }
-      fs.writeFile("public/assets/json/interactions.json", JSON.stringify(jsonData, null, "\t"), function(err) {
+      fs.writeFile("public/assets/json/interactions.json", JSON.stringify(jsonData, null, 2), function(err) {
         if (err) throw err;
         console.log("JSON updated.");
       });
@@ -79,6 +80,70 @@ httpApp.get("*", function(req, res) {
 // Go to login.html when user visits domain name
 httpsApp.get("/", function(req, res) {
   res.sendFile(__dirname + "/public/login.html");
+});
+
+// Search through JSON and add interaction information to temporary JSON, then send back to client
+httpsApp.post("/search", function(req, res) {
+  const SESSIONID_SLICE_START = 23;
+  const SESSIONID_SLICE_END = 44;
+  const USERID_SLICE_START = 18;
+  const USERID_SLICE_END = 40;
+  var filter = req.body.filter;
+  var searchOption = req.body.searchValue;
+  var numItems = req.body.numItems;
+  var json = JSON.parse(fs.readFileSync(file, 'utf8'));
+  var jsonData = {};
+  jsonData.interactions = []
+  var counter = 0;
+  for (var interaction in json.databaseContent) {
+    if (searchOption == "session_id") {     
+      if (json.databaseContent[interaction].sessionId.slice(SESSIONID_SLICE_START, SESSIONID_SLICE_END).toLowerCase().indexOf(filter.toLowerCase()) > -1) {
+        jsonData.interactions.push({
+          sessionId : json.databaseContent[interaction].sessionId,
+          userId : json.databaseContent[interaction].userId,
+          time : json.databaseContent[interaction].time
+        });
+        counter++;
+      }
+    }
+    else if (searchOption == "user_id") {
+      if (json.databaseContent[interaction].userId.slice(USERID_SLICE_START, USERID_SLICE_END).toLowerCase().indexOf(filter.toLowerCase()) > -1) {
+        jsonData.interactions.push({
+          sessionId : json.databaseContent[interaction].sessionId,
+          userId : json.databaseContent[interaction].userId,
+          time : json.databaseContent[interaction].time
+        });
+        counter++;
+      }
+    }
+    else if (searchOption == "session_time") {
+      if (json.databaseContent[interaction].time.toLowerCase().indexOf(filter.toLowerCase()) > -1) {
+        jsonData.interactions.push({
+          sessionId : json.databaseContent[interaction].sessionId,
+          userId : json.databaseContent[interaction].userId,
+          time : json.databaseContent[interaction].time
+        });
+        counter++;
+      }
+    }
+    else if (searchOption == "responses") {
+      for (var response in json.databaseContent[interaction].responses) {
+        if (json.databaseContent[interaction].responses[response].toLowerCase().indexOf(filter.toLowerCase()) >-1) {
+          jsonData.interactions.push({
+            sessionId : json.databaseContent[interaction].sessionId,
+            userId : json.databaseContent[interaction].userId,
+            time : json.databaseContent[interaction].time
+          });
+          counter++;
+          break;
+        }
+      }
+    }
+    if (counter == numItems) {
+      break;
+    }
+  }
+  res.send(JSON.stringify(jsonData));
 });
 
 // Throw a 404 "page not found" error and redirect user to error page

@@ -4,6 +4,8 @@
     <!-- Clientside check user login via Cookies (Insecure), Get session_id from sessionStorage -->
     <script>
       window.onload = function() {
+        const SESSIONID_SLICE_START = 23;
+        const SESSIONID_SLICE_END = 44;
         if (document.cookie.indexOf("databaseSession=valid") == -1) {
           location.href = "login.html";
         }
@@ -11,7 +13,7 @@
           location.href = "error.html";
         }
         else {
-          document.getElementById("result").innerHTML = sessionStorage.getItem("id").slice(23,44) + "...:";
+          document.getElementById("result").innerHTML = sessionStorage.getItem("id").slice(SESSIONID_SLICE_START, SESSIONID_SLICE_END) + "...:";
         }
       }
     </script>
@@ -44,7 +46,7 @@
     
     <!-- Session Table -->
     <div class="container table-responsive">
-      <a href="database.html" id="back">< Back</a>
+      <a href="#" onclick="goBack()" id="back">< Back</a>
       <h1>Viewing Session <span id="result"></span></h1>
       <!-- Search Bar -->
       <input class="form-control" id="searchInput" onkeyup="search()" type="text" placeholder="Search..">
@@ -69,6 +71,13 @@
       </ul>
     </div>
 
+    <!-- Back Button Function -->
+    <script>
+    function goBack() {
+      window.history.go(-1);
+    }
+    </script>
+    
     <!-- Search Function -->
     <script>
     function search() {

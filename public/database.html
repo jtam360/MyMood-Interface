@@ -3,6 +3,9 @@
   <head>
     <!-- Clientside check user login via Cookies (Insecure) -->
     <script>
+      window.onload = function() {
+        search();
+      }
       if (document.cookie.indexOf("databaseSession=valid") == -1) {
         location.href = "login.html";
       }
@@ -21,7 +24,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
     <script src="assets/js/main.js"></script>
-    <script src="assets/js/readJson.js"></script>
     <link rel="stylesheet" href="assets/css/main.css">
     
     <title>MyMood | Database</title>
@@ -37,18 +39,30 @@
     <!-- Database Table -->
     <div class="container table-responsive">
       <h1>MyMood Database Table</h1>
-      <form class="form-inline">
-        <div class="form-group">
+      <form method="post">
+        <div class="form-group" style="float: left;">
           <!-- Option Dropdown list -->
           <select class="form-control" id="searchOption">
+            <option value="responses">Responses</option>
             <option value="session_id">Session ID</option>
             <option value="user_id">User ID</option>
             <option value="session_time">Time</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="float: left;">
           <!-- Search Bar -->
-          <input class="form-control" style="width: 988px;" id="searchInput" onkeyup="search()" type="text" placeholder="Search..">
+          <input class="form-control" id="searchInput" onkeyup="search()" type="text" placeholder="Search..">
+        </div>
+        <div class="form-group" style="float: right;">
+          <!-- Pagination: Items Per Page -->
+          <select class="form-control" id="numItems" onchange="search()">
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+        <div class="form-group" style="font-size: 20px; float: right;">
+          Items per page: &emsp;
         </div>
       </form>
       <br>
@@ -60,6 +74,8 @@
             <th>Time</th>
           </tr>
         </thead>
+        <tbody>
+        </tbody>
       </table>
     </div>
     
@@ -72,48 +88,64 @@
         <li class="page-item"><a class="page-link" href="#">3</a></li>
         <li class="page-item"><a class="page-link" href="#">Next</a></li>
       </ul>
-      <a class="button" href="/assets/json/sessions.json" download="sessions.json">Download raw JSON file</a>
+      <a class="button" href="/assets/json/interactions.json" download="sessions.json">Download raw JSON file</a>
     </div>
 
     <!-- Search Function -->
     <script>
     function search() {
-      var input, filter, table, tr, searchOption, searchValue, td, i;
-      input = document.getElementById("searchInput");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("database_table");
-      tr = table.getElementsByTagName("tr");
-      searchOption = document.getElementById("searchOption");
-      searchValue = searchOption.options[searchOption.selectedIndex].value;
-
-      // Loop through all table rows, and hide those who don't match the search query
-      for (i = 0; i < tr.length; i++) {
-        if (searchValue == "session_id") {
-          td = tr[i].getElementsByTagName("td")[0];
+      const ENTER_KEYCODE = 13;
+      // Prevent the user from pressing enter in search input
+      $(window).keydown(function(event) {
+        if (event.keyCode == ENTER_KEYCODE) {
+          event.preventDefault();
+          return false;
         }
-        else if (searchValue == "user_id") {
-          td = tr[i].getElementsByTagName("td")[1];
+      });
+      var input = document.getElementById("searchInput");
+      var filter = input.value.toLowerCase();
+      var searchOption = document.getElementById("searchOption");
+      var searchValue = searchOption.options[searchOption.selectedIndex].value;
+      var numItems = document.getElementById("numItems").value;
+      // Send client information to backend
+      $.ajax({
+        method: "post",
+        url: "/search",
+        data: JSON.stringify({searchValue: searchValue, filter: filter, numItems: numItems}),
+        dataType: "json",
+        contentType: "application/json",
+        success: function(data) {
+          populateTable(data);
         }
-        else {
-          td = tr[i].getElementsByTagName("td")[2];
-        }
-        if (td) {
-          if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } 
-          else {
-            tr[i].style.display = "none";
-          }
-        } 
-      }
-      readJson.zebraStripe();
+      })
     }
     </script>
     
-    <!-- Read JSON File -->
+    <!-- Re-add new content to the table based on search -->
     <script>
-      readJson.init(["#database_table"]);
-      readJson.readContents();
+    function populateTable(data) {
+      const SESSIONID_SLICE_START = 23;
+      const SESSIONID_SLICE_END = 44;
+      const USERID_SLICE_START = 18;
+      const USERID_SLICE_END = 40;
+      var tblRow = "";
+      var counter = 0;
+      var oddClass = "";
+      for (var i = 0; i < data.interactions.length; i++) {
+        var val = data.interactions[i];
+        counter += 1;
+        if (counter % 2 == 1) {
+          oddClass = "class=odd";
+        }
+        else {
+          oddClass = "";
+        }
+        tblRow += "<tr " + oddClass + ">" + "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">"  + val.sessionId.slice(SESSIONID_SLICE_START, SESSIONID_SLICE_END) + "..." + "</td>" +
+        "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">" + val.userId.slice(USERID_SLICE_START, USERID_SLICE_END) + "..." + "</td>" + 
+        "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">" + val.time + "</td>" + "</tr>";
+      };
+      $("#database_table tbody").html(tblRow);
+    };
     </script>
   </body>
 </html>
