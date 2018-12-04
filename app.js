@@ -5,7 +5,6 @@ var http = require("http");
 var https = require("https");
 var fs = require("fs");
 var path = require("path");
-var bodyParser = require("body-parser");
 var session = require("express-session");
 var cookieParser = require("cookie-parser");
 var file = __dirname + "/public/assets/json/interactions.json";
@@ -31,11 +30,12 @@ httpsApp.use(helmet.hsts({
 }));
 
 httpsApp.use(helmet());
-httpsApp.use(express.static(path.join(__dirname, "public")));
+httpsApp.use(express.static(path.join(__dirname, "public"), {index: false}));
 httpsApp.use(express.urlencoded({
   extended: true
 }));
-httpsApp.use(bodyParser.json());
+httpsApp.use(express.json());
+httpsApp.use(cookieParser());
 
 var cipher = ["ECDHE-ECDSA-AES256-GCM-SHA384",
   "ECDHE-RSA-AES256-GCM-SHA384",
@@ -74,16 +74,6 @@ var updateJSON = schedule.scheduleJob("0 0 * * 1", function() {
     }
     done();
   });
-});
-  
-// Redirect to URL based on the specified path
-httpApp.get("*", function(req, res) {
-  res.redirect("https://" + req.headers.host + req.url);
-});
-
-// Go to login.html when user visits domain name
-httpsApp.get("/", function(req, res) {
-  res.sendFile(__dirname + "/public/login.html");
 });
 
 // Calculate how many pages to show in the pagination bar
@@ -152,6 +142,54 @@ httpsApp.post("/search", function(req, res) {
     }
   }
   res.send(JSON.stringify(jsonData));
+});
+
+// Check username and login, generate and send back cookie if authenticated
+httpsApp.post("/submitLogin", function(req, res) {
+  const MILLIS_TO_HOUR = 60 * 60 * 1000;
+  const COOKIE_TTL_HOURS = 1;
+  var username = req.body.username;
+  var password = req.body.password;
+  if (username.localeCompare(process.env.VALID_USERNAME) === 0 && password.localeCompare(process.env.VALID_PASSWORD) === 0) {
+    res.cookie("databaseSession", "true", {maxAge: COOKIE_TTL_HOURS * MILLIS_TO_HOUR});
+    res.send(true);
+  }
+  else {
+    if (username !== process.env.VALID_USERNAME && password === process.env.VALID_PASSWORD) {
+      res.send(JSON.stringify({
+        username: false,
+        password: true
+      }));
+    }
+    else if (username === process.env.VALID_USERNAME && password !== process.env.VALID_PASSWORD) {
+      res.send(JSON.stringify({
+        username: true,
+        password: false
+      }));
+    }
+    else {
+      res.send(JSON.stringify({
+        username: false,
+        password: false
+      }));
+    }
+  }
+});
+
+// Clear cookie when logged in user logs out
+httpsApp.post("/logout", function(req, res) {
+  res.clearCookie("databaseSession=true");
+  res.redirect("login.html");
+});
+
+// Go to login.html when user visits domain name
+httpsApp.get("/", function(req, res) {
+  res.redirect("login.html");
+});
+
+// Redirect to URL based on the specified path
+httpApp.get("*", function(req, res) {
+  res.redirect("https://" + req.headers.host + req.url);
 });
 
 // Throw a 404 "page not found" error and redirect user to error page

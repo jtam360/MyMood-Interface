@@ -17,7 +17,7 @@
       <li class="nav-item">
         <a class="nav-link" href="aboutus.html">About Us</a>
       </li>
-      <li class="nav-item">
+      <li id="logout" class="nav-item">
         <a class="nav-link" href="login.html">Logout</a>
       </li>
     </ul>
@@ -29,6 +29,20 @@
         $(this).toggleClass('active', 
           window.location.pathname.indexOf($(this).find('a').attr('href')) != -1);
       }); 
+    });
+    </script>
+    
+    <!-- Logout Functionality -->
+    <script>
+    $(document).ready(function() {
+      $(".nav").on("click", "li", function() {
+        if ($(this).attr("id") === "logout") {
+          $.ajax({
+            method: "post",
+            url: "/logout"
+          });
+        }
+      });
     });
     </script>
   </body>

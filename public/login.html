@@ -1,11 +1,6 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Logout functionality. Deletes login cookie. -->
-    <script>
-      document.cookie = "databaseSession=valid; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
-    </script>
-    
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -35,12 +30,12 @@
     <div class="d-flex h-100">
       <div class="m-auto">
         <div class="loginForm">
-          <form method="post" action="">
+          <form method="post" action="/submitLogin">
             <h4 class="headingLogin">Login</h4>
-            <input type="text" id="username" class="form-control input-sm" placeholder="Username"/>
+            <input type="text" id="username" name="username" class="form-control input-sm" placeholder="Username"/>
             <p class="invalidUser text-danger">Invalid Username.</p>
             <br>
-            <input type="password" id="password" class="form-control input-sm" placeholder="Password"/>
+            <input type="password" id="password" name="password" class="form-control input-sm" placeholder="Password"/>
             <p class="invalidPass text-danger">Invalid Password.</p>
             <br>
             <div class="text-center">
@@ -53,9 +48,7 @@
     
     <!-- Login Credentials -->
     <script>
-    const COOKIE_TTL_HOURS = 1;
     const ENTER_KEYCODE = 13;
-    const MILLIS_TO_HOUR = 60 * 60 * 1000;
     $(document).ready(function() {
       $("username").keypress(function(event) {
         if (event.keyCode === ENTER_KEYCODE) {
@@ -69,27 +62,34 @@
       });
       $("#submit").click(function() {
         event.preventDefault();
-        var validUsername = $("#username").val() === "admin"; 
-        var validPassword = $("#password").val() === "securityisnotanafterthoughtitstartsatthedesign";
-        if (validUsername === true && validPassword === true) { 
-          var sessionTimeout = COOKIE_TTL_HOURS;
-          var loginDuration = new Date();
-          loginDuration.setTime(loginDuration.getTime() + (sessionTimeout * MILLIS_TO_HOUR));
-          document.cookie = "databaseSession=valid; expires=" + loginDuration.toGMTString() + "; path=/";
-          window.location = "database.html"; 
-        }
-        else if (validUsername === false && validPassword === true) {
-          $(".invalidUser").css("display", "block");
-          $(".invalidPass").css("display", "none");
-        }
-        else if (validUsername === true && validPassword === false) {
-          $(".invalidUser").css("display", "none");
-          $(".invalidPass").css("display", "block");
-        }
-        else {
-          $(".invalidUser").css("display", "block");
-          $(".invalidPass").css("display", "block");
-        }
+        var validUsername = $("#username").val();
+        var validPassword = $("#password").val();
+        $.ajax({
+          method: "post",
+          url: "/submitLogin",
+          data: JSON.stringify({username: validUsername, password: validPassword}),
+          dataType: "json",
+          contentType: "application/json",
+          success: function(data) {
+            if (data === true) {
+              location.href = "database.html";
+            }
+            else {
+              if (data.username === false && data.password === true) {
+                $(".invalidUser").css("display", "block");
+                $(".invalidPass").css("display", "none");
+              }
+              else if (data.username === true && data.password === false) {
+                $(".invalidUser").css("display", "none");
+                $(".invalidPass").css("display", "block");
+              }
+              else if (data.username === false && data.password === false) {
+                $(".invalidUser").css("display", "block");
+                $(".invalidPass").css("display", "block");
+              }
+            }
+          }
+        });
       });
     });
     </script>
