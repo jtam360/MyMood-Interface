@@ -63,6 +63,10 @@ var updateJSON = schedule.scheduleJob("0 0 * * 1", function() {
         const element = data.Items[index];
         jsonData.databaseContent.push(element);
       }
+      // Sort the JSON by newest sessions on top
+      jsonData.databaseContent.sort(function (a, b) {
+        return new Date(b.time) - new Date(a.time);
+      });
       fs.writeFile("public/assets/json/interactions.json", JSON.stringify(jsonData, null, 2), function(err) {
         if (err) throw err;
         console.log("JSON updated.");
@@ -82,6 +86,14 @@ httpsApp.get("/", function(req, res) {
   res.sendFile(__dirname + "/public/login.html");
 });
 
+// Calculate how many pages to show in the pagination bar
+httpsApp.post("/paginate", function(req, res) {
+  var numItems = req.body.numItems;
+  var json = JSON.parse(fs.readFileSync(file, 'utf8'));
+  var numPages = Math.ceil(json.databaseContent.length / numItems)
+  res.send({numPages: numPages});
+});
+
 // Search through JSON and add interaction information to temporary JSON, then send back to client
 httpsApp.post("/search", function(req, res) {
   const SESSIONID_SLICE_START = 23;
@@ -90,7 +102,6 @@ httpsApp.post("/search", function(req, res) {
   const USERID_SLICE_END = 40;
   var filter = req.body.filter;
   var searchOption = req.body.searchValue;
-  var numItems = req.body.numItems;
   var json = JSON.parse(fs.readFileSync(file, 'utf8'));
   var jsonData = {};
   jsonData.interactions = []
@@ -138,9 +149,6 @@ httpsApp.post("/search", function(req, res) {
           break;
         }
       }
-    }
-    if (counter == numItems) {
-      break;
     }
   }
   res.send(JSON.stringify(jsonData));

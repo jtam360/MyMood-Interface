@@ -3,12 +3,12 @@
   <head>
     <!-- Clientside check user login via Cookies (Insecure) -->
     <script>
-      window.onload = function() {
-        search();
-      }
-      if (document.cookie.indexOf("databaseSession=valid") == -1) {
-        location.href = "login.html";
-      }
+    window.onload = function() {
+      paginate();
+    }
+    if (document.cookie.indexOf("databaseSession=valid") == -1) {
+      location.href = "login.html";
+    }
     </script>
     
     <!-- Required meta tags -->
@@ -55,10 +55,11 @@
         </div>
         <div class="form-group" style="float: right;">
           <!-- Pagination: Items Per Page -->
-          <select class="form-control" id="numItems" onchange="search()">
+          <select class="form-control" id="numItems" onchange="paginate()">
             <option value="10">10</option>
             <option value="15">15</option>
             <option value="20">20</option>
+            <option value="null">ALL</option>
           </select>
         </div>
         <div class="form-group" style="font-size: 20px; float: right;">
@@ -81,16 +82,42 @@
     
     <!-- Pagination -->
     <div class="container">
-      <ul class="pagination" style="margin:20px 0">
-        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
-        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+      <ul class="pagination" id="pagination" style="margin:20px 0">
       </ul>
       <a class="button" href="/assets/json/interactions.json" download="sessions.json">Download raw JSON file</a>
     </div>
-
+  
+    <!-- Pagination Function -->
+    <script>
+    function paginate() {
+      var numItems = document.getElementById("numItems").value;
+      var pageItem = "";
+      var active = "active";
+      // Post to server to calculate how many pages needs to be displayed
+      $.ajax({
+        method: "post",
+        url: "/paginate",
+        data: JSON.stringify({numItems: numItems}),
+        dataType: "json",
+        contentType: "application/json",
+        // Make pagination synchronous so pagination completes first then search
+        async: false,
+        success: function(data) {
+          if (data.numPages != null) {
+            pageItem += "<li id='previous' class='page-item previous disabled'><a class='page-link current' href='#'>Previous</a></li>";
+            for (var i = 0; i < data.numPages; i++) {
+              pageItem += "<li id='"+ (i+1) + "'" + " class='page-item " + active + "'>" + "<a class='page-link' href='#' class='pageClick'>" + (i+1) + "</a></li>";
+              active = "";
+            }
+            pageItem += "<li id='next' class='page-item next'><a class='page-link' href='#'>Next</a></li>";
+          }
+          $("#pagination").html(pageItem);
+        }
+      })
+      search();
+    }
+    </script>
+    
     <!-- Search Function -->
     <script>
     function search() {
@@ -106,12 +133,11 @@
       var filter = input.value.toLowerCase();
       var searchOption = document.getElementById("searchOption");
       var searchValue = searchOption.options[searchOption.selectedIndex].value;
-      var numItems = document.getElementById("numItems").value;
       // Send client information to backend
       $.ajax({
         method: "post",
         url: "/search",
-        data: JSON.stringify({searchValue: searchValue, filter: filter, numItems: numItems}),
+        data: JSON.stringify({searchValue: searchValue, filter: filter}),
         dataType: "json",
         contentType: "application/json",
         success: function(data) {
@@ -131,19 +157,49 @@
       var tblRow = "";
       var counter = 0;
       var oddClass = "";
-      for (var i = 0; i < data.interactions.length; i++) {
-        var val = data.interactions[i];
-        counter += 1;
-        if (counter % 2 == 1) {
-          oddClass = "class=odd";
+      var numItems = document.getElementById("numItems").value;
+      var pageNum = $(".pagination li.active").attr("id");
+      // Display all interactions when ALL option is selected
+      if (numItems === "null") {
+        for (var i = 0; i < data.interactions.length; i++) {
+          var val = data.interactions[i];
+          counter += 1;
+          if (counter % 2 == 1) {
+            oddClass = "class=odd";
+          }
+          else {
+            oddClass = "";
+          }
+          tblRow += "<tr " + oddClass + ">" + "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">"  + val.sessionId.slice(SESSIONID_SLICE_START, SESSIONID_SLICE_END) + "..." + "</td>" +
+          "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">" + val.userId.slice(USERID_SLICE_START, USERID_SLICE_END) + "..." + "</td>" + 
+          "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">" + val.time + "</td>" + "</tr>";
+          if (i === numItems) {
+            break;
+          }
+        };
+      }
+      // Display interactions based on selected page number and number of items to display
+      else {
+        for (var i = ((pageNum - 1) * numItems); i < (pageNum * numItems); i++) {
+          if (i === data.interactions.length) {
+            break;
+          }
+          var val = data.interactions[i];
+          counter += 1;
+          if (counter % 2 == 1) {
+            oddClass = "class=odd";
+          }
+          else {
+            oddClass = "";
+          }
+          tblRow += "<tr " + oddClass + ">" + "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">"  + val.sessionId.slice(SESSIONID_SLICE_START, SESSIONID_SLICE_END) + "..." + "</td>" +
+          "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">" + val.userId.slice(USERID_SLICE_START, USERID_SLICE_END) + "..." + "</td>" + 
+          "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">" + val.time + "</td>" + "</tr>";
+          if (i === numItems) {
+            break;
+          }
         }
-        else {
-          oddClass = "";
-        }
-        tblRow += "<tr " + oddClass + ">" + "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">"  + val.sessionId.slice(SESSIONID_SLICE_START, SESSIONID_SLICE_END) + "..." + "</td>" +
-        "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">" + val.userId.slice(USERID_SLICE_START, USERID_SLICE_END) + "..." + "</td>" + 
-        "<td onClick=\"document.location.href='session.html'; sessionStorage.setItem('id','" + val.sessionId + "');\">" + val.time + "</td>" + "</tr>";
-      };
+      }
       $("#database_table tbody").html(tblRow);
     };
     </script>

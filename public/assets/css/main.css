@@ -50,3 +50,7 @@ tr.odd {
   color: #ffffff;
   text-decoration: none;
 }
+
+.disabled {
+  pointer-events: none;
+}

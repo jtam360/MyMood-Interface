@@ -3,19 +3,19 @@
   <head>
     <!-- Clientside check user login via Cookies (Insecure), Get session_id from sessionStorage -->
     <script>
-      window.onload = function() {
-        const SESSIONID_SLICE_START = 23;
-        const SESSIONID_SLICE_END = 44;
-        if (document.cookie.indexOf("databaseSession=valid") == -1) {
-          location.href = "login.html";
-        }
-        if (sessionStorage.getItem("id") === null) {
-          location.href = "error.html";
-        }
-        else {
-          document.getElementById("result").innerHTML = sessionStorage.getItem("id").slice(SESSIONID_SLICE_START, SESSIONID_SLICE_END) + "...:";
-        }
+    window.onload = function() {
+      const SESSIONID_SLICE_START = 23;
+      const SESSIONID_SLICE_END = 44;
+      if (document.cookie.indexOf("databaseSession=valid") == -1) {
+        location.href = "login.html";
       }
+      if (sessionStorage.getItem("id") === null) {
+        location.href = "error.html";
+      }
+      else {
+        document.getElementById("result").innerHTML = sessionStorage.getItem("id").slice(SESSIONID_SLICE_START, SESSIONID_SLICE_END) + "...:";
+      }
+    }
     </script>
     
     <!-- Required meta tags -->
@@ -58,17 +58,6 @@
           </tr>
         </thead>
       </table>
-    </div>
-    
-    <!-- Pagination -->
-    <div class="container">
-      <ul class="pagination" style="margin:20px 0">
-        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
-        <li class="page-item"><a class="page-link" href="#">Next</a></li>
-      </ul>
     </div>
 
     <!-- Back Button Function -->
